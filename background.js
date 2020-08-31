@@ -1,5 +1,27 @@
 let id = 0;
 
+const createNotification = ({iconUrl, title, message, buttonLabel, type}) => {
+  chrome.notifications.create('Initialized', {
+    type,
+    iconUrl,
+    title,
+    message,
+    buttons: [{ title: buttonLabel }],
+  })
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    switch(request.message) {
+      case 'createNotification':
+        createNotification(request.params)
+        break;
+      case 'closeTab':
+        chrome.tabs.remove(sender.tab.id)
+        break;
+      default:
+        console.error('Request not handled', request)
+    }
+})
 
 chrome.runtime.onInstalled.addListener(function(){
     chrome.storage.sync.set({lastChapter:""})
@@ -8,7 +30,7 @@ chrome.runtime.onInstalled.addListener(function(){
 
 let checker= chrome.alarms.create("Hourly checker", {
     when: Date.now()+600,
-    periodInMinutes:60    
+    periodInMinutes:60
 })
 
 chrome.tabs.onCreated.addListener(function(tab){
